@@ -1,30 +1,31 @@
 import { z } from 'zod';
 
-const userValidationSchema = z.object({
+export const createUserValidationSchema = z.object({
   body: z.object({
-    name: z
+    fullName: z
       .string()
-      .min(1, 'Name is required.')
-      .max(50, 'Name cannot exceed 50 characters.')
-      .trim(),
-    userName: z
-      .string()
-      .min(1, 'Username is required.')
-      .max(30, 'Username cannot exceed 30 characters.')
-      .trim(),
+      .min(1, 'Full name is required')
+      .max(100, 'Full name cannot exceed 100 characters'),
     email: z
       .string()
-      .email('Invalid email format.')
-      .min(1, 'Email is required.')
-      .trim(),
+      .email('Invalid email format')
+      .max(255, 'Email cannot exceed 255 characters'),
     password: z
       .string()
-      .min(6, 'Password must be at least 6 characters.')
-      .max(100, 'Password cannot exceed 100 characters.')
-      .trim(),
+      .min(8, 'Password must be at least 8 characters long')
+      .max(100, 'Password cannot exceed 100 characters'),
+    confirmedPassword: z
+      .string()
+      .min(8, 'Confirmed password must be at least 8 characters long')
+      .max(100, 'Confirmed password cannot exceed 100 characters'),
+    role: z.enum(['jobSeeker', 'recruiter'], {
+      errorMap: () => ({
+        message: 'Role must be either jobSeeker or recruiter',
+      }),
+    }),
   }),
 });
 
 export const UserValidations = {
-  userValidationSchema,
+  createUserValidationSchema,
 };

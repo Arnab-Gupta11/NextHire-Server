@@ -1,13 +1,17 @@
-import { Document } from 'mongoose';
+import { Document, ObjectId } from 'mongoose';
 
 // Interface for User Schema
 export interface IUser extends Document {
-  fullName: string;
   email: string;
-  phoneNumber: string;
   password: string;
-  isVerified: boolean;
+  isVerified?: boolean;
   role: 'jobSeeker' | 'recruiter';
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
+
+export type TEmailVerification = {
+  userId: ObjectId;
+  otp: string;
+  createdAt: Date;
+};
