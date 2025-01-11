@@ -7,7 +7,7 @@ import sendResponse from '../../utils/sendResponse';
 const Login = catchAsync(async (req: Request, res: Response) => {
   const { email, password } = req.body;
   const result = await AuthServices.LoginUser(email, password);
-  const { accessToken, refreshToken } = result;
+  const { id, role, name, profilePicture, accessToken, refreshToken } = result;
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
     secure: config.node_env === 'production',
@@ -22,12 +22,7 @@ const Login = catchAsync(async (req: Request, res: Response) => {
     statusCode: 200,
     success: true,
     message: 'Login Successfully',
-    data: {
-      id: result.id,
-      email: result.email,
-      roles: result.role,
-      is_auth: true,
-    },
+    data: { id, email, name, role, profilePicture },
   });
 });
 export const AuthControllers = {

@@ -5,12 +5,13 @@ import { User } from './user.model';
 import { JobSeeker } from '../jobSeeker/jobSeeker.model';
 import { sendEmailVerificationOTP } from './user.utils';
 import { EmailVerificationModel } from './emailVerification.model';
+import { Recruiter } from '../recruiter/recruiter.model';
 
 /* ---------> Create a new user. <----------- */
 const createUserIntoDB = async (payload: Record<string, string>) => {
   const { fullName, email, password, confirmedPassword, role } = payload;
   // Check if all required fields are provided
-  if (!fullName || !email || !password || !confirmedPassword) {
+  if (!fullName || !email || !password || !confirmedPassword || !role) {
     throw new AppError(
       400,
       'All fields (Full Name, Email, Password, Confirmed Password) are required.',
@@ -52,19 +53,34 @@ const createUserIntoDB = async (payload: Record<string, string>) => {
       );
     }
     //Create a new jobSeeker Profile.
-    const jobSeeker = {
-      user: newRegisterUser[0]._id,
+    const userProfile = {
+      userId: newRegisterUser[0]._id,
       fullName,
       profilePicture: `https://avatar.iran.liara.run/username?username=${fullName}&bold=false&length=1`,
     };
-    //Register jobSeeker Profile into DB.
-    const newJobSeeker = await JobSeeker.create([jobSeeker], { session });
-    if (!newJobSeeker.length) {
-      throw new AppError(
-        500,
-        'Failed to create a Job Seeker profile. Please try again later.',
-      );
+    let userProfileInfo;
+    if (role === 'jobSeeker') {
+      userProfileInfo = await JobSeeker.create([userProfile], {
+        session,
+      });
+      if (!userProfileInfo.length) {
+        throw new AppError(
+          500,
+          'Failed to create a Job Seeker profile. Please try again later.',
+        );
+      }
+    } else {
+      userProfileInfo = await Recruiter.create([userProfile], {
+        session,
+      });
+      if (!userProfileInfo.length) {
+        throw new AppError(
+          500,
+          'Failed to create a Job Seeker profile. Please try again later.',
+        );
+      }
     }
+
     await session.commitTransaction();
     await session.endSession();
     //Send Verification Email.
@@ -75,7 +91,7 @@ const createUserIntoDB = async (payload: Record<string, string>) => {
       userId: newRegisterUser[0]._id,
       email,
       fullName,
-      profilePicture: newJobSeeker[0].profilePicture,
+      profilePicture: userProfileInfo[0].profilePicture,
       role,
     };
     return response;

@@ -31,7 +31,7 @@ export type TWorkExperience = {
   description?: string;
 }[];
 export type TJobSeeker = {
-  user: Types.ObjectId;
+  userId: Types.ObjectId;
   fullName: string;
   location?: string;
   profilePicture?: string;

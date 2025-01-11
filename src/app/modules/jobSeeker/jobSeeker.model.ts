@@ -3,14 +3,14 @@ import { TJobSeeker } from './jobSeeker.interface';
 
 const jobSeekerSchema = new Schema<TJobSeeker>(
   {
-    user: {
+    userId: {
       type: Schema.Types.ObjectId,
       ref: 'User',
     },
     fullName: { type: String },
-    location: { type: String },
     profilePicture: { type: String },
     phoneNumber: { type: String },
+    location: { type: String },
     professionalDetails: {
       currentTitle: { type: String },
       experience: { type: Number },

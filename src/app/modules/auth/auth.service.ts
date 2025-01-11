@@ -1,4 +1,6 @@
 import AppError from '../../errors/AppError';
+import { JobSeeker } from '../jobSeeker/jobSeeker.model';
+import { Recruiter } from '../recruiter/recruiter.model';
 import { User } from '../user/user.model';
 import { createAccessToken, createRefreshToken } from './auth.utils';
 
@@ -37,12 +39,19 @@ const LoginUser = async (email: string, password: string) => {
   const accessToken = createAccessToken(user);
   //Generate refresh token
   const refreshToken = createRefreshToken(user);
-
+  // Get User Profile.
+  let userProfile;
+  if (user.role === 'jobSeeker') {
+    userProfile = await JobSeeker.findOne({ userId: user._id });
+  } else {
+    userProfile = await Recruiter.findOne({ userId: user._id });
+  }
   return {
     id: user._id,
+    name: userProfile?.fullName,
+    profilePicture: userProfile?.profilePicture,
     email: user.email,
     role: user.role,
-    is_auth: true,
     accessToken,
     refreshToken,
   };
