@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 import mongoose from 'mongoose';
 import AppError from '../../errors/AppError';
 import { User } from './user.model';

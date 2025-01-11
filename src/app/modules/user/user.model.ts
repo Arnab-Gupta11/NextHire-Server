@@ -1,7 +1,8 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
+import { IUser, UserModel } from './user.interface';
 // Common User Schema for both Recruiters and Job Seekers
-const userSchema = new mongoose.Schema(
+const userSchema = new mongoose.Schema<IUser, UserModel>(
   {
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
@@ -20,4 +21,12 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
-export const User = mongoose.model('User', userSchema);
+//static methods.
+//check if password matched.
+userSchema.statics.isPasswordMatched = async function (
+  plainTextPassword,
+  hashedPassword,
+) {
+  return await bcrypt.compare(plainTextPassword, hashedPassword);
+};
+export const User = mongoose.model<IUser, UserModel>('User', userSchema);

@@ -1,4 +1,5 @@
-import { Document, ObjectId } from 'mongoose';
+/* eslint-disable no-unused-vars */
+import { Document, Model, ObjectId } from 'mongoose';
 
 // Interface for User Schema
 export interface IUser extends Document {
@@ -15,3 +16,10 @@ export type TEmailVerification = {
   otp: string;
   createdAt: Date;
 };
+
+export interface UserModel extends Model<IUser> {
+  isPasswordMatched(
+    plainTextPassword: string,
+    hashedPassword: string,
+  ): Promise<boolean>;
+}
