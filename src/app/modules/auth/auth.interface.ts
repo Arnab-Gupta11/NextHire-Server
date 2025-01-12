@@ -5,3 +5,8 @@ export type TUserRefreshToken = {
   token: string;
   createdAt: Date;
 };
+
+export type TChangePassword = {
+  oldPassword: string;
+  newPassword: string;
+};

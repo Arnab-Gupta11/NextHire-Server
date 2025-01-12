@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { Document, Model, ObjectId } from 'mongoose';
+import { USER_ROLE } from './user.constant';
 
 // Interface for User Schema
 export interface IUser extends Document {
@@ -22,4 +23,7 @@ export interface UserModel extends Model<IUser> {
     plainTextPassword: string,
     hashedPassword: string,
   ): Promise<boolean>;
+  generateHashPassword(password: string): Promise<string>;
 }
+
+export type TUserRole = keyof typeof USER_ROLE;

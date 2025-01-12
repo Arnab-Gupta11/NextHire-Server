@@ -34,6 +34,8 @@ const createUserIntoDB = async (payload: Record<string, string>) => {
       'A user with this email already exists. Please try logging in or use a different email.',
     );
   }
+  //generate hash password.
+  const hashPassword = await User.generateHashPassword(password);
   //<----------- start session ----------->
   const session = await mongoose.startSession();
   try {
@@ -41,7 +43,7 @@ const createUserIntoDB = async (payload: Record<string, string>) => {
     //Create a User
     const user = {
       email,
-      password,
+      password: hashPassword,
       role,
     };
     //Register user into DB

@@ -4,7 +4,8 @@ import { AuthServices } from './auth.service';
 import { config } from '../../config';
 import sendResponse from '../../utils/sendResponse';
 
-const Login = catchAsync(async (req: Request, res: Response) => {
+//Login controller.
+const login = catchAsync(async (req: Request, res: Response) => {
   const { email, password } = req.body;
   const result = await AuthServices.LoginUser(email, password);
   const { id, role, name, profilePicture, accessToken, refreshToken } = result;
@@ -25,6 +26,30 @@ const Login = catchAsync(async (req: Request, res: Response) => {
     data: { id, email, name, role, profilePicture },
   });
 });
+//change Password controller.
+const changePassword = catchAsync(async (req: Request, res: Response) => {
+  const result = await AuthServices.changePasswordIntoDB(req?.user, req.body);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Password is changed succesfully!',
+    data: result,
+  });
+});
+
+//Logout controller.
+const logout = catchAsync(async (req: Request, res: Response) => {
+  res.clearCookie('accessToken');
+  res.clearCookie('refreshToken');
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Logout successfully',
+    data: {},
+  });
+});
 export const AuthControllers = {
-  Login,
+  login,
+  logout,
+  changePassword,
 };

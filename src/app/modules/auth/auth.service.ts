@@ -1,9 +1,12 @@
+import { JwtPayload } from 'jsonwebtoken';
 import AppError from '../../errors/AppError';
 import { JobSeeker } from '../jobSeeker/jobSeeker.model';
 import { Recruiter } from '../recruiter/recruiter.model';
 import { User } from '../user/user.model';
+import { TChangePassword } from './auth.interface';
 import { createAccessToken, createRefreshToken } from './auth.utils';
 
+//Login User.
 const LoginUser = async (email: string, password: string) => {
   // Validate that email and password are provided
   if (!email || !password) {
@@ -57,6 +60,40 @@ const LoginUser = async (email: string, password: string) => {
   };
 };
 
+//Change Password.
+const changePasswordIntoDB = async (
+  userData: JwtPayload,
+  payload: TChangePassword,
+) => {
+  const { _id } = userData;
+  const { oldPassword, newPassword } = payload;
+  // Check if both password and password_confirmation are provided
+  if (!oldPassword || !newPassword) {
+    throw new AppError(400, 'All Fields are required.');
+  }
+  //check if user is found.
+  const user = await User.findById(_id);
+  if (!user) {
+    throw new AppError(404, 'User not found.');
+  }
+  //checking if the old password is correct.
+  const isOldPasswordMatched = await User.isPasswordMatched(
+    oldPassword,
+    user?.password,
+  );
+  if (!isOldPasswordMatched) {
+    throw new AppError(400, 'Password do not matched.');
+  }
+
+  //generate hash password
+  const hashPassword = await User.generateHashPassword(newPassword);
+
+  //Update user password
+  await User.findByIdAndUpdate(_id, { $set: { password: hashPassword } });
+  return null;
+};
+
 export const AuthServices = {
   LoginUser,
+  changePasswordIntoDB,
 };
