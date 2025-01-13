@@ -32,7 +32,20 @@ const verifyUserEmail = catchAsync(async (req: Request, res: Response) => {
     );
   }
 });
+
+const getUserProfile = catchAsync(async (req: Request, res: Response) => {
+  const result = await UserServices.getMe(req.user);
+  if (result) {
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: 'Get your Profile Successfully.',
+      data: result,
+    });
+  }
+});
 export const UserControler = {
   createUser,
   verifyUserEmail,
+  getUserProfile
 };

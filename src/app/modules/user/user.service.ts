@@ -6,6 +6,8 @@ import { JobSeeker } from '../jobSeeker/jobSeeker.model';
 import { sendEmailVerificationOTP } from './user.utils';
 import { EmailVerificationModel } from './emailVerification.model';
 import { Recruiter } from '../recruiter/recruiter.model';
+import { JwtPayload } from 'jsonwebtoken';
+import { USER_ROLE } from './user.constant';
 
 /* ---------> Create a new user. <----------- */
 const createUserIntoDB = async (payload: Record<string, string>) => {
@@ -166,7 +168,28 @@ const verifyUserEmailInDB = async (email: string, otp: string) => {
   return true;
 };
 
+/* ---------> Get User Profile. <----------- */
+const getMe = async (payload: JwtPayload) => {
+  const { _id, role } = payload;
+  let result = null;
+  if (role === USER_ROLE.jobSeeker) {
+    result = await JobSeeker.findOne({ userId: _id }).populate({
+      path: 'userId',
+      select: '_id email role',
+    });
+  }
+  if (role === USER_ROLE.recruiter) {
+    result = await Recruiter.findOne({ userId: _id }).populate({
+      path: 'userId',
+      select: '_id email role',
+    });
+  }
+
+  return result;
+};
+
 export const UserServices = {
   createUserIntoDB,
   verifyUserEmailInDB,
+  getMe,
 };

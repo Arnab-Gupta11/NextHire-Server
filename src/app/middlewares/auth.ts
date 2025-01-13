@@ -9,7 +9,6 @@ import { User } from '../modules/user/user.model';
 const auth = (...requiredRoles: TUserRole[]) => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const token = req.cookies?.accessToken;
-    console.log(token);
     //checking if the token is missing.
     if (!token) {
       throw new AppError(401, 'You are not authorized');
@@ -20,7 +19,6 @@ const auth = (...requiredRoles: TUserRole[]) => {
       config.jwt_access_token_secret_key as string,
     ) as JwtPayload;
     const { role, _id } = decoded;
-    console.log(role);
     // checking if the user is exist.
     const user = await User.findById(_id);
     if (!user) {
