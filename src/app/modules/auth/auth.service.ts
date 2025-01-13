@@ -1,9 +1,10 @@
-import { JwtPayload } from 'jsonwebtoken';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import AppError from '../../errors/AppError';
 import { JobSeeker } from '../jobSeeker/jobSeeker.model';
 import { Recruiter } from '../recruiter/recruiter.model';
 import { User } from '../user/user.model';
-import { TChangePassword } from './auth.interface';
+import { TChangePassword, TResetPassword } from './auth.interface';
 import {
   createAccessToken,
   createPasswordResetToken,
@@ -12,6 +13,7 @@ import {
 import { config } from '../../config';
 import { sendEmail } from '../../utils/sendEmail';
 import { passwordResetEmailTemplate } from '../../utils/emailTemplate';
+import { IUser } from '../user/user.interface';
 
 /*--------> Login User. <---------*/
 const LoginUser = async (email: string, password: string) => {
@@ -124,8 +126,61 @@ const SendUserPasswordResetEmail = async (email: string) => {
   });
   return resetLink;
 };
+/*-------> Password Reset <--------*/
+const userPasswordReset = async (
+  payload: TResetPassword,
+  id: string,
+  token: string,
+) => {
+  const { password, confirmedPassword } = payload;
+  // Check if password and password_confirmation are provided
+  if (!password || !confirmedPassword) {
+    throw new AppError(
+      400,
+      'New Password and Confirm New Password are required',
+    );
+  }
+  // Check if password and password_confirmation match
+  if (password !== confirmedPassword) {
+    throw new AppError(
+      400,
+      "New Password and Confirm New Password don't match",
+    );
+  }
+  // Find user by ID
+  const user = (await User.findById(id)) as IUser;
+  if (!user) {
+    throw new AppError(404, 'User not found');
+  }
+  // Validate token
+  let decoded;
+  try {
+    decoded = jwt.verify(
+      token,
+      config.jwt_password_reset_token_secret_key as string,
+    ) as JwtPayload;
+  } catch (err) {
+    throw new AppError(
+      403,
+      'The password reset link has expired or is invalid. Please request a new password reset link.',
+    );
+  }
+  if (user._id.toString() !== decoded._id) {
+    throw new AppError(
+      403,
+      'The password reset link has expired or is invalid. Please request a new password reset link.',
+    );
+  }
+  // Generate salt and hash new password.
+  const hashPassword = await User.generateHashPassword(password);
+  // Update user's password
+  await User.findByIdAndUpdate(user._id, { $set: { password: hashPassword } });
+  return null;
+};
+
 export const AuthServices = {
   LoginUser,
   changePasswordIntoDB,
   SendUserPasswordResetEmail,
+  userPasswordReset,
 };

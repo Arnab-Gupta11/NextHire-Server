@@ -10,3 +10,7 @@ export type TChangePassword = {
   oldPassword: string;
   newPassword: string;
 };
+export type TResetPassword = {
+  password: string;
+  confirmedPassword: string;
+};

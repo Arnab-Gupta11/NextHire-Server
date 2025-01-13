@@ -52,6 +52,17 @@ const sendUserPasswordResetLinkByEmail = catchAsync(
   },
 );
 
+const passwordReset = catchAsync(async (req: Request, res: Response) => {
+  const { id, token } = req.params;
+  const result = await AuthServices.userPasswordReset(req.body, id, token);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Password reset successfully.',
+    data: result,
+  });
+});
+
 //Logout controller.
 const logout = catchAsync(async (req: Request, res: Response) => {
   res.clearCookie('accessToken');
@@ -68,4 +79,5 @@ export const AuthControllers = {
   logout,
   changePassword,
   sendUserPasswordResetLinkByEmail,
+  passwordReset,
 };

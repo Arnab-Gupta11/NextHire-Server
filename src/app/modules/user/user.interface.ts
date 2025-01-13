@@ -4,6 +4,7 @@ import { USER_ROLE } from './user.constant';
 
 // Interface for User Schema
 export interface IUser extends Document {
+  _id: ObjectId;
   email: string;
   password: string;
   isVerified?: boolean;
