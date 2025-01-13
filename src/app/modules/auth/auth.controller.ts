@@ -37,6 +37,21 @@ const changePassword = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const sendUserPasswordResetLinkByEmail = catchAsync(
+  async (req: Request, res: Response) => {
+    const { email } = req.body;
+    const result = await AuthServices.SendUserPasswordResetEmail(email);
+    if (result) {
+      sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: 'Password reset email sent. Please check your email.',
+        data: result,
+      });
+    }
+  },
+);
+
 //Logout controller.
 const logout = catchAsync(async (req: Request, res: Response) => {
   res.clearCookie('accessToken');
@@ -52,4 +67,5 @@ export const AuthControllers = {
   login,
   logout,
   changePassword,
+  sendUserPasswordResetLinkByEmail,
 };

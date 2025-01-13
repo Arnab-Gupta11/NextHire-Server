@@ -20,3 +20,11 @@ export const createRefreshToken = (user: IUser) => {
   const expiresIn = '365d';
   return jwt.sign(payload, secret, { expiresIn });
 };
+export const createPasswordResetToken = (user: IUser) => {
+  const payload = {
+    _id: user._id,
+  };
+  const secret = config.jwt_password_reset_token_secret_key as string;
+  const expiresIn = '15m';
+  return jwt.sign(payload, secret, { expiresIn });
+};

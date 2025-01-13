@@ -4,9 +4,16 @@ import { JobSeeker } from '../jobSeeker/jobSeeker.model';
 import { Recruiter } from '../recruiter/recruiter.model';
 import { User } from '../user/user.model';
 import { TChangePassword } from './auth.interface';
-import { createAccessToken, createRefreshToken } from './auth.utils';
+import {
+  createAccessToken,
+  createPasswordResetToken,
+  createRefreshToken,
+} from './auth.utils';
+import { config } from '../../config';
+import { sendEmail } from '../../utils/sendEmail';
+import { passwordResetEmailTemplate } from '../../utils/emailTemplate';
 
-//Login User.
+/*--------> Login User. <---------*/
 const LoginUser = async (email: string, password: string) => {
   // Validate that email and password are provided
   if (!email || !password) {
@@ -60,7 +67,7 @@ const LoginUser = async (email: string, password: string) => {
   };
 };
 
-//Change Password.
+/*-------> Change Password. <-------*/
 const changePasswordIntoDB = async (
   userData: JwtPayload,
   payload: TChangePassword,
@@ -93,7 +100,32 @@ const changePasswordIntoDB = async (
   return null;
 };
 
+/*-------> Send Password Resest link via email <--------*/
+const SendUserPasswordResetEmail = async (email: string) => {
+  // Check if email is provided
+  if (!email) {
+    throw new AppError(400, 'Email Field is Required.');
+  }
+  // Find user by email
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new AppError(400, "Email doesn't exist.");
+  }
+  // Generate token for password reset.
+  const token = createPasswordResetToken(user) as string;
+
+  //Password Reset Link
+  const resetLink = `${config.frontend_host}/account/reset-password-confirm/${user._id}/${token}`;
+
+  await sendEmail({
+    to: user.email,
+    subject: 'Password Reset Link',
+    html: passwordResetEmailTemplate(resetLink),
+  });
+  return resetLink;
+};
 export const AuthServices = {
   LoginUser,
   changePasswordIntoDB,
+  SendUserPasswordResetEmail,
 };
